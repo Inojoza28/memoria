@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="style.css">
+  <title>Jogo da Memória Premium</title>
+</head>
+<body>
+  <h1>Jogo da Memória</h1>
+  
+  <!-- Botões Iniciais -->
+  <div class="initial-buttons">
+    <button id="start-btn">Começar Jogo</button>
+    <button id="reset-btn" style="display: none;">Reiniciar Jogo</button>
+  </div>
+  
+  <!-- Info Bar com contadores -->
+  <div class="info-bar" id="info-bar">
+    <div>Jogadas: <span id="move-counter">0</span></div>
+    <div>Tempo: <span id="timer">00:00</span></div>
+  </div>
+  
+  <!-- Tabuleiro do jogo -->
+  <div id="game-board"></div>
+  
+  <!-- Overlay de Vitória -->
+  <div id="victory-overlay">
+    <h2>Parabéns!</h2>
+    <p>Você completou o jogo em <span id="final-time"></span> com <span id="final-moves"></span> jogadas!</p>
+    <button id="play-again-btn">Jogar Novamente</button>
+  </div>
+  
+  <script>
+    // Configurações iniciais
+    const symbols = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+    let cards = [];
+    let firstCard = null;
+    let secondCard = null;
+    let boardLocked = false;
+    let matchesFound = 0;
+    let moves = 0;
+    let timerInterval = null;
+    let secondsElapsed = 0;
+    let gameStarted = false;
+    
+    const board = document.getElementById('game-board');
+    const moveCounterEl = document.getElementById('move-counter');
+    const timerEl = document.getElementById('timer');
+    const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const infoBar = document.getElementById('info-bar');
+    const victoryOverlay = document.getElementById('victory-overlay');
+    const finalTimeEl = document.getElementById('final-time');
+    const finalMovesEl = document.getElementById('final-moves');
+    const playAgainBtn = document.getElementById('play-again-btn');
+    const initialButtons = document.querySelector('.initial-buttons');
+    
+    // Função para embaralhar o array
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    
+    // Atualiza o contador de jogadas
+    function updateMoves() {
+      moveCounterEl.textContent = moves;
+    }
+    
+    // Atualiza o cronômetro
+    function updateTimer() {
+      const minutes = Math.floor(secondsElapsed / 60);
+      const seconds = secondsElapsed % 60;
+      timerEl.textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // Inicia o cronômetro
+    function startTimer() {
+      clearInterval(timerInterval);
+      secondsElapsed = 0;
+      updateTimer();
+      timerInterval = setInterval(() => {
+        secondsElapsed++;
+        updateTimer();
+      }, 1000);
+    }
+    
+    // Cria o tabuleiro do jogo
+    function createBoard() {
+      board.innerHTML = '';
+      cards = [];
+      matchesFound = 0;
+      moves = 0;
+      updateMoves();
+      firstCard = null;
+      secondCard = null;
+      boardLocked = false;
+      clearInterval(timerInterval);
+      startTimer();
+      hideVictoryOverlay();
+      infoBar.classList.add('active');
+      board.classList.add('active');
+      
+      // Duplica e embaralha símbolos para formar pares
+      const doubleSymbols = shuffle([...symbols, ...symbols]);
+      
+      doubleSymbols.forEach((symbol, index) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.symbol = symbol;
+        card.dataset.index = index;
+        
+        // Criação da estrutura interna para efeito flip 3D
+        const cardInner = document.createElement('div');
+        cardInner.classList.add('card-inner');
+        
+        const cardBack = document.createElement('div');
+        cardBack.classList.add('card-face', 'card-back');
+        cardBack.textContent = '?';
+        
+        const cardFront = document.createElement('div');
+        cardFront.classList.add('card-face', 'card-front');
+        cardFront.textContent = symbol;
+        
+        cardInner.appendChild(cardBack);
+        cardInner.appendChild(cardFront);
+        card.appendChild(cardInner);
+        
+        // Evento de clique na carta
+        card.addEventListener('click', () => flipCard(card));
+        
+        cards.push(card);
+        board.appendChild(card);
+      });
+    }
+    
+    // Lida com a virada da carta
+    function flipCard(card) {
+      if (!gameStarted) return; // Impede interação antes do jogo iniciar
+      if (boardLocked || card.querySelector('.card-inner').classList.contains('flip')) return;
+      
+      card.querySelector('.card-inner').classList.add('flip');
+      
+      if (!firstCard) {
+        firstCard = card;
+      } else {
+        secondCard = card;
+        boardLocked = true;
+        moves++;
+        updateMoves();
+        checkForMatch();
+      }
+    }
+    
+    // Verifica se as duas cartas selecionadas são iguais
+    function checkForMatch() {
+      const isMatch = firstCard.dataset.symbol === secondCard.dataset.symbol;
+      
+      if (isMatch) {
+        matchesFound++;
+        resetTurn();
+        if (matchesFound === symbols.length) {
+          endGame();
+        }
+      } else {
+        setTimeout(() => {
+          firstCard.querySelector('.card-inner').classList.remove('flip');
+          secondCard.querySelector('.card-inner').classList.remove('flip');
+          resetTurn();
+        }, 1000);
+      }
+    }
+    
+    // Reseta a seleção das cartas
+    function resetTurn() {
+      [firstCard, secondCard] = [null, null];
+      boardLocked = false;
+    }
+    
+    // Finaliza o jogo e exibe o overlay de vitória
+    function endGame() {
+      clearInterval(timerInterval);
+      setTimeout(() => {
+        finalTimeEl.textContent = timerEl.textContent;
+        finalMovesEl.textContent = moves;
+        victoryOverlay.classList.add('visible');
+        gameStarted = false;
+      }, 500);
+    }
+    
+    // Esconde o overlay de vitória (para novos jogos)
+    function hideVictoryOverlay() {
+      victoryOverlay.classList.remove('visible');
+    }
+    
+    // Inicia o jogo quando o botão "Começar Jogo" é clicado
+    function startGame() {
+      gameStarted = true;
+      createBoard();
+      startBtn.style.display = 'none'; // Esconde o botão de iniciar após o jogo começar
+      resetBtn.style.display = 'inline-block'; // Mostra o botão de reiniciar
+    }
+    
+    // Reinicia o jogo quando o botão "Reiniciar Jogo" é clicado
+    function resetGame() {
+      createBoard();
+    }
+    
+    // Eventos dos botões
+    startBtn.addEventListener('click', startGame);
+    resetBtn.addEventListener('click', resetGame);
+    playAgainBtn.addEventListener('click', () => {
+      victoryOverlay.classList.remove('visible');
+      startGame();
+    });
+    
+    // Inicializa o jogo sem começar (interações desabilitadas)
+    function initializeGame() {
+      gameStarted = false;
+      infoBar.classList.remove('active');
+      board.classList.remove('active');
+      board.innerHTML = '';
+      resetBtn.style.display = 'none';
+      startBtn.style.display = 'inline-block';
+      clearInterval(timerInterval);
+      secondsElapsed = 0;
+      updateTimer();
+      updateMoves();
+    }
+    
+    // Chama a função de inicialização quando a página carrega
+    window.onload = initializeGame;
+  </script>
+</body>
+</html>
