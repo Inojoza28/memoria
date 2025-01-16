@@ -1,192 +1,317 @@
-    /* Reset e configurações básicas */
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #2c3e50, #34495e);
-        color: #ecf0f1;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-      }
-      h1 {
-        margin-bottom: 20px;
-        font-size: 2.2em;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-      }
-      /* Container dos botões iniciais */
-      .initial-buttons {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      /* Info Bar com contadores */
-      .info-bar {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 20px;
-        font-size: 1.1em;
-        flex-wrap: wrap;
-        justify-content: center;
-        opacity: 0; /* Escondido inicialmente */
-        transition: opacity 0.5s;
-      }
-      .info-bar.active {
-        opacity: 1; /* Mostrado quando o jogo começa */
-      }
-      .info-bar > div {
-        background-color: rgba(0, 0, 0, 0.35);
-        padding: 10px 15px;
-        border-radius: 5px;
-        transition: background-color 0.3s;
-      }
-      .info-bar > div:hover {
-        background-color: rgba(0, 0, 0, 0.6);
-      }
-      /* Grid do tabuleiro */
-      #game-board {
-        display: grid;
-        grid-template-columns: repeat(4, 90px);
-        grid-gap: 12px;
-        justify-content: center;
-        margin-bottom: 20px;
-        pointer-events: none; /* Desabilita interações inicialmente */
-        opacity: 0.5; /* Visual indicando que está desabilitado */
-        transition: opacity 0.5s, pointer-events 0.5s;
-      }
-      #game-board.active {
-        pointer-events: all; /* Habilita interações quando ativo */
-        opacity: 1;
-      }
-      /* Estilização das cartas com efeito flip 3D */
-      .card {
-        width: 90px;
-        height: 90px;
-        perspective: 1000px;
-      }
-      .card-inner {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        transform-style: preserve-3d;
-        transition: transform 0.6s;
-        cursor: pointer;
-        border-radius: 8px;
-      }
-      .card-inner.flip {
-        transform: rotateY(180deg);
-        cursor: default;
-      }
-      .card-face {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        border-radius: 8px;
-        backface-visibility: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2em;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        transition: transform 0.3s;
-      }
-      .card-back {
-        background-color: #ecf0f1;
-        color: #2c3e50;
-      }
-      .card-front {
-        background-color: #e74c3c;
-        transform: rotateY(180deg);
-      }
-      .card:hover .card-face:not(.card-front) {
-        transform: scale(1.05);
-      }
-      /* Botões customizados */
-      #start-btn,
-      #reset-btn,
-      #play-again-btn {
-        padding: 12px 25px;
-        background: linear-gradient(45deg, #e67e22, #d35400);
-        border: none;
-        border-radius: 50px;
-        font-size: 1em;
-        color: #fff;
-        cursor: pointer;
-        transition: transform 0.2s, background 0.3s;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        outline: none;
-      }
-      #start-btn:hover,
-      #reset-btn:hover,
-      #play-again-btn:hover {
-        transform: scale(1.05);
-        background: linear-gradient(45deg, #d35400, #e67e22);
-      }
-      /* Tela de vitória customizada */
-      #victory-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(44, 62, 80, 0.95);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        text-align: center;
-        z-index: 100;
-        padding: 20px;
-        transition: opacity 0.5s;
-      }
-      #victory-overlay.visible {
-        display: flex;
-        animation: fadeIn 0.5s forwards;
-      }
-      @keyframes fadeIn {
-        from { opacity: 0 }
-        to { opacity: 1 }
-      }
-      #victory-overlay h2 {
-        font-size: 2.5em;
-        margin-bottom: 20px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-      }
-      #victory-overlay p {
-        font-size: 1.3em;
-        margin-bottom: 30px;
-      }
-      /* Responsividade: ajuste para telas menores */
-      @media (max-width: 600px) {
-        h1 {
-          font-size: 1.8em;
-        }
-        .info-bar {
-          font-size: 1em;
-        }
-        #game-board {
-          grid-template-columns: repeat(3, 80px);
-          grid-gap: 10px;
-        }
-        .card {
-          width: 80px;
-          height: 80px;
-        }
-        .card-face {
-          font-size: 1.8em;
-        }
-        /* Ajuste nos botões para telas pequenas */
-        #start-btn,
-        #reset-btn,
-        #play-again-btn {
-          padding: 10px 20px;
-          font-size: 0.9em;
-        }
-      }
+/* Reset e configurações básicas */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  color: #ecf0f1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  position: relative;
+}
+
+/* Tela Inicial: Centraliza título e botões */
+#initial-screen {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+#main-title {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  transition: transform 0.5s ease, font-size 0.5s ease;
+}
+
+/* Quando o jogo inicia, move o título para o topo */
+#main-title.top {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2em;
+}
+
+/* Botões iniciais e do jogo */
+.initial-buttons,
+.game-buttons {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 12px 25px;
+  background: linear-gradient(45deg, #e67e22, #d35400);
+  border: none;
+  border-radius: 50px;
+  font-size: 1em;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  outline: none;
+}
+
+button:hover {
+  transform: scale(1.05);
+  background: linear-gradient(45deg, #d35400, #e67e22);
+}
+
+/* Botão de fechar diferenciado */
+#close-btn {
+  background: linear-gradient(45deg, #d34300, #e62222);
+}
+
+/* Countdown Overlay */
+#countdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(44, 62, 80, 0.95);
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 150;
+}
+
+#countdown-overlay h2 {
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+
+#countdown-timer {
+  font-size: 4em;
+}
+
+/* Container do jogo (oculto inicialmente) */
+#game-container {
+  width: 100%;
+  padding-top: 40px; /* Espaço para o título fixo no topo */
+  display: none;
+}
+
+/* Info Bar */
+.info-bar {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  font-size: 1.1em;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.info-bar.active {
+  opacity: 1;
+}
+
+.info-bar > div {
+  background-color: rgba(0, 0, 0, 0.35);
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.info-bar > div:hover {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* Grid do Tabuleiro */
+#game-board {
+  display: grid;
+  grid-template-columns: repeat(4, 90px);
+  grid-gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+  pointer-events: none;
+  opacity: 0.5;
+  transition: opacity 0.5s, pointer-events 0.5s;
+}
+
+#game-board.active {
+  pointer-events: all;
+  opacity: 1;
+}
+
+/* Cartas com efeito flip 3D */
+.card {
+  width: 90px;
+  height: 90px;
+  perspective: 1000px;
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.card-inner.flip {
+  transform: rotateY(180deg);
+  cursor: default;
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease;
+}
+
+.card-back {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+}
+
+.card-front {
+  background-color: #e74c3c;
+  transform: rotateY(180deg);
+}
+
+.card:hover .card-face:not(.card-front) {
+  transform: scale(1.05);
+}
+
+/* Overlay de vitória */
+#victory-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(44, 62, 80, 0.95);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  z-index: 100;
+  padding: 20px;
+  transition: opacity 0.5s ease;
+}
+
+#victory-overlay.visible {
+  display: flex;
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#victory-overlay h2 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+#victory-overlay p {
+  font-size: 1.3em;
+  margin-bottom: 30px;
+}
+
+
+/* Responsividade */
+@media (max-width: 600px) {
+  #main-title {
+    font-size: 2em;
+  }
+  
+  #main-title.top {
+    font-size: 1.8em;
+  }
+  
+  .info-bar {
+    font-size: 1em;
+  }
+  
+  #game-board {
+    grid-template-columns: repeat(3, 80px);
+    grid-gap: 10px;
+  }
+  
+  .card {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .card-face {
+    font-size: 1.8em;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 0.9em;
+  }
+}
+/* Animação de pulo mais rápida e suave */
+@keyframes jump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.15) translateY(-8px);
+  }
+  60% {
+    transform: scale(0.95) translateY(4px);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Aplica o fundo verde e a animação à face frontal acertada */
+.card-front.match {
+  background-color: #2ecc71 !important;  /* Fundo verde fixo */
+  animation: jump 0.3s ease-out;
+}
+
+/* Estilizando o título do jogo (dentro do container do jogo) */
+#game-title {
+  font-size: 2em;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #ecf0f1;
+}
+
+#game-title {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Quando o jogo iniciar, você pode adicionar uma classe (por exemplo, "visible") para exibir o título */
+#game-title.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
