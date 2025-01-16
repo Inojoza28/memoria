@@ -273,6 +273,9 @@ button:hover {
     padding: 10px 20px;
     font-size: 0.9em;
   }
+  #countdown-overlay h2{
+    font-size: 26px;
+  }
 }
 /* Animação de pulo mais rápida e suave */
 @keyframes jump {
