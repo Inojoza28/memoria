@@ -244,7 +244,7 @@ button:hover {
 /* Responsividade */
 @media (max-width: 600px) {
   #main-title {
-    font-size: 2em;
+    font-size: 1.8em;
   }
   
   #main-title.top {
